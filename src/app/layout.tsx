@@ -17,13 +17,15 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Favicon */}
-        <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+        {/* ✅ Correct favicon setup */}
+        <link rel="icon" href="/favicon.ico?v=2" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="/favicon.ico?v=2" />
+        <meta name="theme-color" content="#000000" />
 
-        {/* Optional: logo preload for faster navbar rendering */}
+        {/* ✅ Preload your logo for navbar */}
         <link rel="preload" as="image" href="/typezillalogo.png" />
 
-        {/* Fonts */}
+        {/* ✅ Fonts */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
@@ -42,23 +44,11 @@ export default function RootLayout({
       >
         <LanguageProvider>
           <AuthProvider>
-            {/* Navbar logo area */}
-            <header className="flex items-center p-4">
-              <a href="/" className="flex items-center gap-2">
-                <img
-                  src="/typezillalogo.png"
-                  alt="TypeZilla Logo"
-                  width={140}
-                  height={40}
-                  className="object-contain"
-                />
-              </a>
-            </header>
-
             {children}
             <Toaster />
           </AuthProvider>
         </LanguageProvider>
       </body>
     </html>
-  )};
+  );
+}
