@@ -1,0 +1,187 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 220 10% 8%;
+    --foreground: 220 10% 85%;
+    
+    --card: 220 10% 12%;
+    --card-foreground: 220 10% 85%;
+    
+    --popover: 220 10% 8%;
+    --popover-foreground: 220 10% 85%;
+
+    --primary: 195 100% 50%;
+    --primary-foreground: 220 20% 10%;
+
+    --secondary: 220 10% 25%;
+    --secondary-foreground: 220 10% 85%;
+
+    --muted: 220 10% 20%;
+    --muted-foreground: 220 10% 65%;
+
+    --accent: 195 100% 50%;
+    --accent-foreground: 220 20% 10%;
+    
+    --destructive: 0 80% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --success: 140 60% 55%;
+    --success-foreground: 140 60% 95%;
+
+    --border: 220 10% 20%;
+    --input: 220 10% 25%;
+    --ring: 195 100% 50%;
+
+    --radius: 0.5rem;
+
+    --chart-1: 195 100% 50%;
+    --chart-2: 220 10% 55%;
+    --chart-3: 180 70% 55%;
+    --chart-4: 300 70% 60%;
+    --chart-5: 30 70% 60%;
+  }
+
+  .dark {
+    --background: 220 10% 8%;
+    --foreground: 220 10% 85%;
+    
+    --card: 220 10% 12%;
+    --card-foreground: 220 10% 85%;
+    
+    --popover: 220 10% 8%;
+    --popover-foreground: 220 10% 85%;
+
+    --primary: 195 100% 50%;
+    --primary-foreground: 220 20% 10%;
+
+    --secondary: 220 10% 25%;
+    --secondary-foreground: 220 10% 85%;
+
+    --muted: 220 10% 20%;
+    --muted-foreground: 220 10% 65%;
+
+    --accent: 195 100% 50%;
+    --accent-foreground: 220 20% 10%;
+    
+    --destructive: 0 80% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --success: 140 60% 55%;
+    --success-foreground: 140 60% 95%;
+
+    --border: 220 10% 20%;
+    --input: 220 10% 25%;
+    --ring: 195 100% 50%;
+
+    --chart-1: 195 100% 50%;
+    --chart-2: 220 10% 55%;
+    --chart-3: 180 70% 55%;
+    --chart-4: 300 70% 60%;
+    --chart-5: 30 70% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-body;
+    animation: pulse-background 15s infinite ease-in-out;
+  }
+}
+
+@layer utilities {
+  .text-neon-purple {
+    @apply text-purple-400;
+    text-shadow: 0 0 8px currentColor;
+  }
+  .text-incognito {
+    @apply bg-gradient-to-r from-[#FFA500] to-[#FF9900] bg-clip-text text-transparent;
+  }
+  .text-glow-primary {
+    text-shadow: 0 0 10px hsl(var(--primary));
+  }
+  .text-glow-destructive {
+    text-shadow: 0 0 5px hsl(var(--destructive));
+  }
+  .text-glow-gold {
+    @apply text-yellow-400;
+    text-shadow: 0 0 7px theme('colors.yellow.400');
+  }
+  .text-glow-silver {
+    @apply text-gray-200;
+    text-shadow: 0 0 7px theme('colors.gray.200');
+  }
+  .text-glow-bronze {
+    @apply text-orange-400;
+    text-shadow: 0 0 7px theme('colors.orange.400');
+  }
+  .pioneer-badge-animated {
+    animation: pioneer-badge-animation 5s linear infinite;
+    background-size: 200% 200%;
+  }
+  .voidmin-badge-animated {
+    animation: voidmin-badge-animation 1.5s linear infinite;
+    background-size: 200% 200%;
+  }
+  .animate-pulse-background {
+    animation: pulse-background 4s linear infinite;
+  }
+  .animate-rgb-train {
+    background: linear-gradient(90deg, #ff0000, #FFA500, #8A2BE2, #000000, #ff0000);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: rgb-train 4s linear infinite;
+  }
+  .animate-rgb-stroke {
+    animation: rgb-stroke-animation 4s linear infinite;
+  }
+}
+
+@keyframes pulse-background {
+  0% { background-color: hsl(220, 10%, 8%); }
+  33% { background-color: hsl(220, 10%, 10%); }
+  66% { background-color: hsl(230, 10%, 8%); }
+  100% { background-color: hsl(220, 10%, 8%); }
+}
+
+@keyframes pioneer-badge-animation {
+  0% { background-image: linear-gradient(135deg, #8A2BE2, #4B0082); } /* Purple */
+  25% { background-image: linear-gradient(135deg, #FF69B4, #FF1493); } /* Pink */
+  50% { background-image: linear-gradient(135deg, #2E8B57, #3CB371); } /* Green */
+  75% { background-image: linear-gradient(135deg, #FFA500, #FF8C00); } /* Orange */
+  100% { background-image: linear-gradient(135deg, #8A2BE2, #4B0082); } /* Purple */
+}
+
+@keyframes voidmin-badge-animation {
+  0% {
+    box-shadow: 0 0 5px #ff0000, 0 0 10px #ff0000;
+  }
+  50% {
+    box-shadow: 0 0 15px #ff0000, 0 0 20px #ff0000;
+  }
+  100% {
+    box-shadow: 0 0 5px #ff0000, 0 0 10px #ff0000;
+  }
+}
+
+@keyframes rgb-train {
+  to {
+    background-position: -200% center;
+  }
+}
+
+@keyframes rgb-stroke-animation {
+    0% { stroke: #ff0000; }   /* Red */
+    25% { stroke: #FFA500; }  /* Orange */
+    50% { stroke: #8A2BE2; }  /* Purple */
+    75% { stroke: #000000; }  /* Black */
+    100% { stroke: #ff0000; } /* Red */
+}
