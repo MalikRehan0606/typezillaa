@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from 'next/link';
@@ -9,12 +8,11 @@ import { SettingsDialog } from '@/components/settings-dialog';
 import { TypingTip } from '@/components/typing-tip';
 import { useLanguage } from '@/contexts/language-provider';
 import { LanguageSelector } from '@/components/language-selector';
-import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useState } from 'react';
 import Image from 'next/image';
-import { cn } from '@/lib/utils';
 
-// Custom component for the RGB animated crown
+// RGB animated crown icon
 const RgbCrownIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -33,7 +31,6 @@ const RgbCrownIcon = () => (
   </svg>
 );
 
-
 export default function HomePage() {
   const creatorGitHubUrl = "https://github.com/MalikRehan0606";
   const { user, logout, isAnonymous } = useAuth();
@@ -51,7 +48,7 @@ export default function HomePage() {
       <div className="hidden md:flex items-center gap-2">
         <Button asChild variant="ghost" size="icon" className="text-muted-foreground hover:text-primary hover:bg-background">
           <Link href="/about" aria-label="About the Creator">
-              <InfoIcon className="h-6 w-6" />
+            <InfoIcon className="h-6 w-6" />
           </Link>
         </Button>
         <LanguageSelector />
@@ -69,12 +66,12 @@ export default function HomePage() {
             </Button>
           </>
         ) : (
-           <Button asChild variant="outline" className="hover:text-primary hover:bg-background">
-              <Link href="/profile">
-                <UserIcon className="mr-2 h-4 w-4" />
-                Profile
-              </Link>
-            </Button>
+          <Button asChild variant="outline" className="hover:text-primary hover:bg-background">
+            <Link href="/profile">
+              <UserIcon className="mr-2 h-4 w-4" />
+              Profile
+            </Link>
+          </Button>
         )}
         <a
           href={creatorGitHubUrl}
@@ -86,6 +83,8 @@ export default function HomePage() {
           <GithubIcon className="h-6 w-6" />
         </a>
       </div>
+
+      {/* Mobile Menu */}
       <div className="md:hidden">
         <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
           <SheetTrigger asChild>
@@ -96,26 +95,33 @@ export default function HomePage() {
           </SheetTrigger>
           <SheetContent side="right" className="w-3/4">
             <div className="flex flex-col gap-4 py-6">
-                <NavLink href="/about">
-                  <InfoIcon className="mr-2 h-5 w-5" />
-                  About
-                </NavLink>
-                <NavLink href="/profile">
-                  <UserIcon className="mr-2 h-5 w-5" />
-                  Profile
-                </NavLink>
-                {user && !isAnonymous && (
-                    <Button variant="ghost" onClick={() => { logout(); setIsSheetOpen(false); }} className="w-full justify-start text-base text-destructive hover:text-destructive">
-                      <LogOutIcon className="mr-2 h-5 w-5" /> {t.logout}
-                    </Button>
-                )}
-                <div className="mt-4 flex flex-col gap-2">
-                    <p className="text-sm text-muted-foreground px-4">Settings</p>
-                    <div className="px-2">
-                      <LanguageSelector />
-                    </div>
-                    <SettingsDialog />
+              <NavLink href="/about">
+                <InfoIcon className="mr-2 h-5 w-5" />
+                About
+              </NavLink>
+              <NavLink href="/profile">
+                <UserIcon className="mr-2 h-5 w-5" />
+                Profile
+              </NavLink>
+              {user && !isAnonymous && (
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    logout();
+                    setIsSheetOpen(false);
+                  }}
+                  className="w-full justify-start text-base text-destructive hover:text-destructive"
+                >
+                  <LogOutIcon className="mr-2 h-5 w-5" /> {t.logout}
+                </Button>
+              )}
+              <div className="mt-4 flex flex-col gap-2">
+                <p className="text-sm text-muted-foreground px-4">Settings</p>
+                <div className="px-2">
+                  <LanguageSelector />
                 </div>
+                <SettingsDialog />
+              </div>
             </div>
           </SheetContent>
         </Sheet>
@@ -125,10 +131,18 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
+      {/* ✅ Fixed Header with Correct Logo */}
       <header className="py-2 px-6 md:px-8 border-b border-border sticky top-0 z-50 bg-background/80 backdrop-blur-md">
         <div className="container mx-auto flex justify-between items-center">
           <Link href="/" className="flex items-center">
-            <Image src={`/sounds/logo.png/logo.png?v=${new Date().getTime()}`} alt="TypeZilla Logo" width={140} height={32} />
+            <Image
+              src="/typezillalogo.png"
+              alt="TypeZilla Logo"
+              width={150}
+              height={36}
+              priority
+              className="object-contain hover:drop-shadow-[0_0_6px_#00bfff] transition-all duration-300"
+            />
           </Link>
           {headerContent}
         </div>
@@ -141,19 +155,19 @@ export default function HomePage() {
           </h2>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <div className="p-1 rounded-lg border border-input hover:border-primary/50 transition-colors">
-                <Button asChild size="lg" variant="ghost" className="text-base hover:text-primary hover:bg-transparent">
-                  <Link href="/levels">
-                    {t.homeChooseChallenge} <ArrowRightIcon className="ml-2 h-5 w-5" />
-                  </Link>
-                </Button>
+              <Button asChild size="lg" variant="ghost" className="text-base hover:text-primary hover:bg-transparent">
+                <Link href="/levels">
+                  {t.homeChooseChallenge} <ArrowRightIcon className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
             </div>
             <div className="p-1 rounded-lg border border-input hover:border-primary/50 transition-colors">
-                <Button asChild size="lg" variant="ghost" className="text-xl hover:bg-transparent hover:text-primary">
-                  <Link href="/leaderboard" className="flex items-center">
-                    <span className="animate-rgb-train">{t.leaderboard}</span>
-                    <RgbCrownIcon />
-                  </Link>
-                </Button>
+              <Button asChild size="lg" variant="ghost" className="text-xl hover:bg-transparent hover:text-primary">
+                <Link href="/leaderboard" className="flex items-center">
+                  <span className="animate-rgb-train">{t.leaderboard}</span>
+                  <RgbCrownIcon />
+                </Link>
+              </Button>
             </div>
           </div>
         </section>
