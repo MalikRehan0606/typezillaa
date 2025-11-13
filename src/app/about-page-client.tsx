@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import Link from 'next/link';
@@ -42,32 +41,42 @@ export default function AboutPageClient() {
   const [isClient, setIsClient] = useState(false);
 
   const processWpmDataForChart = (testResults: LeaderboardEntry[]) => {
-    const bins: { [key: string]: { name: string, users: number } } = {};
+    if (testResults.length === 0) return [];
+  
+    const bins: { [key: string]: { name: string; users: number } } = {};
     const binSize = 10;
-    
-    // The max WPM for the chart will be 99.
-    const maxWpm = 99;
-
-    for (let i = 0; i <= Math.ceil(maxWpm / binSize); i++) {
-        const lowerBound = i * binSize;
-        const upperBound = lowerBound + binSize - 1;
-        const binName = `${lowerBound}-${upperBound}`;
-        bins[binName] = { name: binName, users: 0 };
+  
+    // Dynamically determine the max WPM from the data, with a minimum of 100
+    const maxWpmInData = Math.max(...testResults.map(entry => entry.wpm), 99);
+    const maxWpm = Math.ceil((maxWpmInData + 1) / binSize) * binSize -1;
+  
+    // Initialize bins up to the calculated max
+    for (let i = 0; i <= Math.floor(maxWpm / binSize); i++) {
+      const lowerBound = i * binSize;
+      const upperBound = lowerBound + binSize - 1;
+      const binName = `${lowerBound}-${upperBound}`;
+      bins[binName] = { name: binName, users: 0 };
     }
-    
+  
     testResults.forEach(entry => {
-        // Only include scores less than 100
-        if (entry.wpm < 100) {
-            const binIndex = Math.floor(entry.wpm / binSize);
-            const lowerBound = binIndex * binSize;
-            const upperBound = lowerBound + binSize - 1;
-            const binName = `${lowerBound}-${upperBound}`;
-            if (bins[binName]) {
-                bins[binName].users += 1;
-            }
-        }
-    });
+      const binIndex = Math.floor(entry.wpm / binSize);
+      const lowerBound = binIndex * binSize;
+      const upperBound = lowerBound + binSize - 1;
+      
+      let binName = `${lowerBound}-${upperBound}`;
 
+      // If a score is higher than the generated bins, create a new "150+" style bin
+      if (!bins[binName]) {
+          const plusBinName = `${lowerBound}+`;
+          if (!bins[plusBinName]) {
+              bins[plusBinName] = { name: plusBinName, users: 0 };
+          }
+          binName = plusBinName;
+      }
+      
+      bins[binName].users += 1;
+    });
+  
     return Object.values(bins);
   };
 
@@ -149,11 +158,11 @@ export default function AboutPageClient() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground font-mono">
+    <div className="flex flex-col min-h-screen text-foreground font-mono">
       <header className="py-2 px-6 md:px-8 border-b border-border sticky top-0 z-50 bg-background/80 backdrop-blur-md">
         <div className="container mx-auto flex justify-between items-center">
           <Link href="/" className="flex items-center">
-            <Image src={`/sounds/logo.png/logo.png?v=${new Date().getTime()}`} alt="TypeZilla Logo" width={140} height={32} />
+            <Image src="/typezillalogo.png" alt="TypeZilla Logo" width={140} height={32} />
           </Link>
           <div className="flex items-center gap-4">
             <LanguageSelector />

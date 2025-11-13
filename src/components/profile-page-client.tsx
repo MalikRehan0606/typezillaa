@@ -1,31 +1,23 @@
 
-
 "use client";
 
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { GithubIcon, ArrowLeftIcon, Loader2, LogOutIcon, UserIcon, TrophyIcon, HistoryIcon,LogInIcon, UserPlusIcon, StarIcon, FlagIcon, BarChart, FlameIcon } from "lucide-react";
-import { useState, useEffect, useRef } from 'react';
+import { Loader2, UserIcon, TrophyIcon, LogInIcon, UserPlusIcon, StarIcon, FlameIcon } from "lucide-react";
+import { useState, useEffect } from 'react';
 import type { TestHistoryEntry, Achievement, UserProfileData } from '@/types';
-import { db, auth, storage } from "@/lib/firebase";
-import { collection, query, where, orderBy, limit, onSnapshot, doc, setDoc, getDoc, serverTimestamp, updateDoc, collectionGroup, getDocs, Timestamp } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { collection, query, orderBy, limit, onSnapshot, doc } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/components/auth-provider';
-import { SettingsDialog } from './settings-dialog';
-import { TypingTip } from './typing-tip';
-import { useLanguage } from '@/contexts/language-provider';
-import { LanguageSelector } from './language-selector';
 import { cn } from '@/lib/utils';
-import { useRouter } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { checkAchievements, ALL_ACHIEVEMENTS } from '@/lib/achievements';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import Image from 'next/image';
+import { ALL_ACHIEVEMENTS } from '@/lib/achievements';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
-
 
 const ProfileChart = dynamic(() => import('@/components/profile-chart'), {
   ssr: false,
@@ -78,9 +70,7 @@ const PersonalBestCard: React.FC<{ title: string, pbs: { [key: string]: {wpm: nu
 
 export function ProfilePageClient() {
   const { toast } = useToast();
-  const { user, loading, logout, isAnonymous } = useAuth();
-  const { t } = useLanguage();
-  const router = useRouter();
+  const { user, loading, isAnonymous } = useAuth();
   const [profileData, setProfileData] = useState<UserProfileData | null>(null);
   const [history, setHistory] = useState<TestHistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -182,7 +172,7 @@ export function ProfilePageClient() {
           unsubscribeProfile();
           unsubscribeHistory();
       }
-  }, [user, loading, isAnonymous, router, toast]);
+  }, [user, loading, isAnonymous, toast]);
 
   if (loading) {
       return (
@@ -198,166 +188,125 @@ export function ProfilePageClient() {
       return `Joined ${date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}`;
   }
   
-  const formatTypingTime = (totalSeconds: number = 0) => {
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = Math.floor(totalSeconds % 60);
-    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-  };
-
-  const headerContent = (
-    <header className="py-2 px-6 md:px-8 border-b border-border sticky top-0 z-50 bg-background/80 backdrop-blur-md">
-      <div className="container mx-auto flex justify-between items-center">
-        <Link href="/" className="flex items-center">
-          <Image src="/sounds/logo.png/logo.png" alt="TypeZilla Logo" width={140} height={32} />
-        </Link>
-        <div className="flex items-center gap-4">
-          <LanguageSelector />
-          <SettingsDialog />
-          {user && !isAnonymous && (
-            <Button variant="outline" onClick={logout} className="hover:text-primary hover:bg-background">
-              <LogOutIcon className="mr-2 h-4 w-4" /> {t.logout}
-            </Button>
-          )}
-          <a
-            href={"https://github.com/MalikRehan0606"}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-muted-foreground hover:text-primary transition-colors"
-            aria-label="View creator's profile on GitHub"
-          >
-            <GithubIcon className="h-6 w-6" />
-          </a>
-        </div>
-      </div>
-    </header>
-  );
-  
   const unlockedAchievements = achievements.filter(ach => ach.unlocked);
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground font-mono">
-      {headerContent}
-      
-      <main className="flex-grow container mx-auto flex flex-col items-center p-4 md:p-8">
-        <div className="w-full max-w-6xl">
-            {isAnonymous ? (
-              <Card className="text-center py-12 px-6">
-                <CardHeader>
-                  <CardTitle className="text-2xl font-headline">Track Your Progress</CardTitle>
-                  <CardDescription className="max-w-md mx-auto">
-                    Create a free account to save your test history, see your performance improve over time, and compete on the global leaderboards.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="flex flex-col sm:flex-row gap-4 justify-center">
-                    <Button asChild size="lg" variant="outline" className="hover:bg-background hover:text-primary">
-                      <Link href="/login">
-                          <LogInIcon className="mr-2 h-5 w-5"/>
-                          Login
-                      </Link>
-                    </Button>
-                    <Button asChild size="lg" variant="outline" className="hover:bg-background hover:text-primary">
-                       <Link href="/signup">
-                          <UserPlusIcon className="mr-2 h-5 w-5"/>
-                          Sign Up
-                      </Link>
-                    </Button>
-                </CardContent>
-              </Card>
-            ) : isLoading ? (
-                <div className="flex justify-center items-center py-20">
-                    <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                </div>
-            ) : (
-                <Tabs defaultValue="overview" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3 mb-6">
-                        <TabsTrigger value="overview">Overview</TabsTrigger>
-                        <TabsTrigger value="charts">Charts</TabsTrigger>
-                        <TabsTrigger value="achievements">Achievements</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="overview">
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 items-start">
-                            <div className="md:col-span-1 flex flex-col gap-4">
-                                <Card className="p-4">
-                                    <div className="flex items-center gap-4">
-                                        <Avatar className="h-20 w-20">
-                                            <AvatarImage src={profileData?.photoURL} alt={profileData?.name} />
-                                            <AvatarFallback>
-                                                <UserIcon className="h-10 w-10 text-primary" />
-                                            </AvatarFallback>
-                                        </Avatar>
-                                        <div className="flex-grow">
-                                          <div className="flex items-center gap-2">
-                                              <h2 className="text-2xl font-bold">{profileData?.name}</h2>
+    <main className="flex-grow container mx-auto flex flex-col items-center p-4 md:p-8 mt-20">
+      <div className="w-full max-w-6xl">
+          {isAnonymous ? (
+            <Card className="text-center py-12 px-6">
+              <CardHeader>
+                <CardTitle className="text-2xl font-headline">Track Your Progress</CardTitle>
+                <CardDescription className="max-w-md mx-auto">
+                  Create a free account to save your test history, see your performance improve over time, and compete on the global leaderboards.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Button asChild size="lg" variant="outline" className="hover:bg-background hover:text-primary">
+                    <Link href="/login">
+                        <LogInIcon className="mr-2 h-5 w-5"/>
+                        Login
+                    </Link>
+                  </Button>
+                  <Button asChild size="lg" variant="outline" className="hover:bg-background hover:text-primary">
+                     <Link href="/signup">
+                        <UserPlusIcon className="mr-2 h-5 w-5"/>
+                        Sign Up
+                    </Link>
+                  </Button>
+              </CardContent>
+            </Card>
+          ) : isLoading ? (
+              <div className="flex justify-center items-center py-20">
+                  <Loader2 className="h-12 w-12 animate-spin text-primary" />
+              </div>
+          ) : (
+              <Tabs defaultValue="overview" className="w-full">
+                  <TabsList className="grid w-full grid-cols-3 mb-6">
+                      <TabsTrigger value="overview">Overview</TabsTrigger>
+                      <TabsTrigger value="charts">Charts</TabsTrigger>
+                      <TabsTrigger value="achievements">Achievements</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="overview">
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-8 items-start">
+                          <div className="md:col-span-1 flex flex-col gap-4">
+                              <Card className="p-4">
+                                  <div className="flex items-center gap-4">
+                                      <Avatar className="h-20 w-20">
+                                          <AvatarImage src={profileData?.photoURL} alt={profileData?.name} />
+                                          <AvatarFallback>
+                                              <UserIcon className="h-10 w-10 text-primary" />
+                                          </AvatarFallback>
+                                      </Avatar>
+                                      <div className="flex-grow">
+                                        <div className="flex items-center gap-2">
+                                            <h2 className="text-2xl font-bold">{profileData?.name}</h2>
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">{formatJoinDate(profileData?.createdAt)}</p>
+                                      </div>
+                                  </div>
+                                  <p className="text-xs text-muted-foreground mt-4">This will be your public display name and cannot be changed.</p>
+                              </Card>
+                          </div>
+                           <div className="md:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-4">
+                              <StatCard title="current streak" value={profileData?.currentStreak || 0} valueClassName="text-orange-400" icon={<FlameIcon className="h-4 w-4 text-muted-foreground" />} />
+                              <StatCard title="longest streak" value={profileData?.longestStreak || 0} icon={<TrophyIcon className="h-4 w-4 text-muted-foreground" />} />
+                              <StatCard title="tests started" value={profileData?.testsStarted || 0}/>
+                              <StatCard title="tests completed" value={profileData?.testsCompleted || 0}/>
+                          </div>
+                      </div>
+
+                      <div className="grid md:grid-cols-2 gap-8 mt-8">
+                          <PersonalBestCard 
+                              title="Personal Bests (Words)"
+                              pbs={{
+                                  "15 words": profileData?.personalBests?.words?.[15],
+                                  "30 words": profileData?.personalBests?.words?.[30],
+                                  "45 words": profileData?.personalBests?.words?.[45],
+                              }}
+                          />
+                          <PersonalBestCard 
+                              title="Personal Bests (Time)"
+                              pbs={{
+                                  "15 sec": profileData?.personalBests?.time?.[15],
+                                  "30 sec": profileData?.personalBests?.time?.[30],
+                                  "60 sec": profileData?.personalBests?.time?.[60],
+                              }}
+                          />
+                      </div>
+                      
+                  </TabsContent>
+                  <TabsContent value="charts">
+                      <ProfileChart data={history} />
+                  </TabsContent>
+                  <TabsContent value="achievements">
+                      <Card>
+                          <CardHeader>
+                              <CardTitle>Achievements</CardTitle>
+                              <CardDescription>Badges you've earned through your typing journey.</CardDescription>
+                          </CardHeader>
+                          <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                              {unlockedAchievements.length > 0 ? (
+                                  unlockedAchievements.map((ach) => (
+                                      <div key={ach.id} className="flex items-start gap-4 p-4 rounded-lg border bg-card border-primary/30">
+                                          <ach.icon className="h-8 w-8 mt-1 text-primary" />
+                                          <div>
+                                              <h4 className="font-semibold text-foreground">{ach.name}</h4>
+                                              <p className="text-sm text-muted-foreground">{ach.description}</p>
                                           </div>
-                                          <p className="text-xs text-muted-foreground">{formatJoinDate(profileData?.createdAt)}</p>
-                                        </div>
-                                    </div>
-                                    <p className="text-xs text-muted-foreground mt-4">This will be your public display name and cannot be changed.</p>
-                                </Card>
-                            </div>
-                             <div className="md:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-4">
-                                <StatCard title="current streak" value={profileData?.currentStreak || 0} valueClassName="text-orange-400" icon={<FlameIcon className="h-4 w-4 text-muted-foreground" />} />
-                                <StatCard title="longest streak" value={profileData?.longestStreak || 0} icon={<TrophyIcon className="h-4 w-4 text-muted-foreground" />} />
-                                <StatCard title="tests started" value={profileData?.testsStarted || 0}/>
-                                <StatCard title="tests completed" value={profileData?.testsCompleted || 0}/>
-                            </div>
-                        </div>
-
-                        <div className="grid md:grid-cols-2 gap-8 mt-8">
-                            <PersonalBestCard 
-                                title="Personal Bests (Words)"
-                                pbs={{
-                                    "15 words": profileData?.personalBests?.words?.[15],
-                                    "30 words": profileData?.personalBests?.words?.[30],
-                                    "45 words": profileData?.personalBests?.words?.[45],
-                                }}
-                            />
-                            <PersonalBestCard 
-                                title="Personal Bests (Time)"
-                                pbs={{
-                                    "15 sec": profileData?.personalBests?.time?.[15],
-                                    "30 sec": profileData?.personalBests?.time?.[30],
-                                    "60 sec": profileData?.personalBests?.time?.[60],
-                                }}
-                            />
-                        </div>
-                        
-                    </TabsContent>
-                    <TabsContent value="charts">
-                        <ProfileChart data={history} />
-                    </TabsContent>
-                    <TabsContent value="achievements">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Achievements</CardTitle>
-                                <CardDescription>Badges you've earned through your typing journey.</CardDescription>
-                            </CardHeader>
-                            <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {unlockedAchievements.length > 0 ? (
-                                    unlockedAchievements.map((ach) => (
-                                        <div key={ach.id} className="flex items-start gap-4 p-4 rounded-lg border bg-card border-primary/30">
-                                            <ach.icon className="h-8 w-8 mt-1 text-primary" />
-                                            <div>
-                                                <h4 className="font-semibold text-foreground">{ach.name}</h4>
-                                                <p className="text-sm text-muted-foreground">{ach.description}</p>
-                                            </div>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <div className="col-span-full text-center text-muted-foreground py-10">
-                                        <p>You haven't unlocked any achievements yet. Keep practicing!</p>
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
-                </Tabs>
-            )}
-        </div>
-      </main>
-
-      <TypingTip />
-    </div>
+                                      </div>
+                                  ))
+                              ) : (
+                                  <div className="col-span-full text-center text-muted-foreground py-10">
+                                      <p>You haven't unlocked any achievements yet. Keep practicing!</p>
+                                  </div>
+                              )}
+                          </CardContent>
+                      </Card>
+                  </TabsContent>
+              </Tabs>
+          )}
+      </div>
+    </main>
   );
 }

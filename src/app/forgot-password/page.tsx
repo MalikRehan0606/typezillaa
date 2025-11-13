@@ -12,13 +12,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { GithubIcon, Loader2, ArrowLeftIcon } from 'lucide-react';
+import { Loader2, ArrowLeftIcon } from 'lucide-react';
 import { useAuth } from '@/components/auth-provider';
-import { SettingsDialog } from '@/components/settings-dialog';
 import { TypingTip } from '@/components/typing-tip';
-import { LanguageSelector } from '@/components/language-selector';
 import { useLanguage } from '@/contexts/language-provider';
-import Image from 'next/image';
+import { Header } from '@/components/header';
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
@@ -26,7 +24,6 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [pageError, setPageError] = useState<string | null>(null);
-  const creatorGitHubUrl = "https://github.com/MalikRehan0606";
   const { user, isAnonymous } = useAuth();
   const { t } = useLanguage();
 
@@ -117,26 +114,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
-      <header className="py-2 px-6 md:px-8 border-b border-border sticky top-0 z-50 bg-background/80 backdrop-blur-md">
-        <div className="container mx-auto flex justify-between items-center">
-          <Link href="/" className="flex items-center">
-            <Image src={`/sounds/logo.png/logo.png?v=${new Date().getTime()}`} alt="TypeZilla Logo" width={140} height={32} />
-          </Link>
-          <div className="flex items-center gap-4">
-            <LanguageSelector />
-            <SettingsDialog />
-            <a
-              href={creatorGitHubUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-primary transition-colors"
-              aria-label="View creator's profile on GitHub"
-            >
-              <GithubIcon className="h-6 w-6" />
-            </a>
-          </div>
-        </div>
-      </header>
+      <Header />
       <main className="flex-grow container mx-auto flex flex-col items-center justify-center p-4">
         <Card className="w-full max-w-sm shadow-xl">
           <CardHeader>

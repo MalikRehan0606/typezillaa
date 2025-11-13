@@ -59,8 +59,14 @@ export default function SignupPage() {
           totalTimeTyping: 0,
           currentStreak: 0,
           longestStreak: 0,
-          lastTestTimestamp: null,
+          unlockedAchievements: [],
           friends: [],
+          lastTestTimestamp: null,
+          challengeStats: {
+            dailyChallengeCount: 0,
+            dailyChallengeCountResetAt: serverTimestamp(),
+            lastChallengeSentAt: null,
+          },
           dominionBadgesEarned: 0,
           sentinelBadgesEarned: 0,
           eternalFlameBadgesEarned: 0,
@@ -129,7 +135,7 @@ export default function SignupPage() {
        <header className="py-2 px-6 md:px-8 border-b border-border sticky top-0 z-50 bg-background/80 backdrop-blur-md">
         <div className="container mx-auto flex justify-between items-center">
           <Link href="/" className="flex items-center">
-            <Image src={`/sounds/logo.png/logo.png?v=${new Date().getTime()}`} alt="TypeZilla Logo" width={140} height={32} />
+            <Image src="/typezillalogo.png" alt="TypeZilla Logo" width={140} height={32} />
           </Link>
           <div className="flex items-center gap-4">
             <LanguageSelector />

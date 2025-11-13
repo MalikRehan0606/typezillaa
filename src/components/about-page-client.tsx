@@ -5,18 +5,13 @@ import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { GithubIcon, ArrowLeftIcon, Loader2, LogOutIcon, User as UserIcon, Zap, Target, Star, Globe, History, BrainCircuit, Users } from "lucide-react";
+import { ArrowLeftIcon, Loader2, Zap, BrainCircuit, Globe, History, Star, Users } from "lucide-react";
 import { useState, useEffect } from 'react';
 import type { GlobalStats, LeaderboardEntry } from '@/types';
 import { db } from "@/lib/firebase";
 import { collection, query, orderBy, limit, doc, onSnapshot } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from '@/components/auth-provider';
-import { SettingsDialog } from './settings-dialog';
-import { TypingTip } from './typing-tip';
 import { useLanguage } from '@/contexts/language-provider';
-import { LanguageSelector } from './language-selector';
-import Image from 'next/image';
 
 const AboutChart = dynamic(() => import('@/components/about-chart'), {
   ssr: false,
@@ -29,7 +24,6 @@ const AboutChart = dynamic(() => import('@/components/about-chart'), {
 
 export default function AboutPageClient() {
   const { toast } = useToast();
-  const { user, logout, isAnonymous } = useAuth();
   const { t } = useLanguage();
   const [stats, setStats] = useState<GlobalStats>({
     totalTestStarted: 0,
@@ -148,150 +142,105 @@ export default function AboutPageClient() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground font-mono">
-      <header className="py-2 px-6 md:px-8 border-b border-border sticky top-0 z-50 bg-background/80 backdrop-blur-md">
-        <div className="container mx-auto flex justify-between items-center">
-          <Link href="/" className="flex items-center">
-            <Image src={`/sounds/logo.png/logo.png?v=${new Date().getTime()}`} alt="TypeZilla Logo" width={140} height={32} />
-          </Link>
-          <div className="flex items-center gap-4">
-            <LanguageSelector />
-            <SettingsDialog />
-            {user && !isAnonymous ? (
-              <>
-                <Button asChild variant="outline" className="hover:text-primary hover:bg-background">
-                  <Link href="/profile">
-                    <UserIcon className="mr-2 h-4 w-4" />
-                    Profile
-                  </Link>
-                </Button>
-                <Button variant="outline" onClick={logout} className="hover:text-primary hover:bg-background">
-                  <LogOutIcon className="mr-2 h-4 w-4" /> {t.logout}
-                </Button>
-              </>
-            ) : (
-                <Button asChild variant="outline" className="hover:text-primary hover:bg-background">
-                  <Link href="/profile">
-                    <UserIcon className="mr-2 h-4 w-4" />
-                    Profile
-                  </Link>
-                </Button>
-            )}
-            <a
-              href={"https://github.com/MalikRehan0606"}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-primary transition-colors"
-              aria-label="View creator's profile on GitHub"
-            >
-              <GithubIcon className="h-6 w-6" />
-            </a>
-          </div>
+    <main className="flex-grow container mx-auto flex flex-col items-center p-4 md:p-8 mt-20">
+      <div className="w-full max-w-6xl text-center">
+        <Link href="/" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center mb-8 w-fit mx-auto">
+          <ArrowLeftIcon className="mr-2 h-4 w-4" />
+          {t.backToHome}
+        </Link>
+        
+        <div className="mb-12 text-sm text-muted-foreground font-semibold">
+          <p>{t.aboutCreatedBy}</p>
+          <p>{t.aboutLaunchedOn}</p>
         </div>
-      </header>
-
-      <main className="flex-grow container mx-auto flex flex-col items-center p-4 md:p-8">
-        <div className="w-full max-w-6xl text-center">
-          <Link href="/" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center mb-8 w-fit mx-auto">
-            <ArrowLeftIcon className="mr-2 h-4 w-4" />
-            {t.backToHome}
-          </Link>
           
-          <div className="mb-12 text-sm text-muted-foreground font-semibold">
-            <p>{t.aboutCreatedBy}</p>
-            <p>{t.aboutLaunchedOn}</p>
-          </div>
-            
-          <Card className="mb-12 text-left bg-card/30">
-            <CardHeader>
-                <CardTitle className="text-2xl font-headline text-center">About TypeZilla</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 text-muted-foreground">
-                <p>
-                    Experience realistic typing tests, get AI-powered feedback, and track your progress to become a faster, more accurate typist. TypeZilla is designed to be a comprehensive platform for typists of all skill levels.
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 pt-4">
-                    <div className="flex items-start gap-3">
-                        <Zap className="h-5 w-5 text-primary mt-1" />
-                        <div>
-                            <h4 className="font-semibold text-foreground">Varied Typing Challenges</h4>
-                            <p>Choose from word-based tests with simple, intermediate, and expert difficulties, or time-based challenges.</p>
-                        </div>
-                    </div>
-                     <div className="flex items-start gap-3">
-                        <Users className="h-5 w-5 text-primary mt-1" />
-                        <div>
-                            <h4 className="font-semibold text-foreground">Social Features</h4>
-                            <p>Users can view each other's public profiles and send friend requests to build a community.</p>
-                        </div>
-                    </div>
-                     <div className="flex items-start gap-3">
-                        <BrainCircuit className="h-5 w-5 text-primary mt-1" />
-                        <div>
-                            <h4 className="font-semibold text-foreground">AI-Powered Analysis</h4>
-                            <p>After each test, an AI coach provides personalized feedback on your performance, highlighting strengths and offering tips.</p>
-                        </div>
-                    </div>
-                     <div className="flex items-start gap-3">
-                        <Globe className="h-5 w-5 text-primary mt-1" />
-                        <div>
-                            <h4 className="font-semibold text-foreground">Global Leaderboards</h4>
-                            <p>Compete with users worldwide, with leaderboards filtered by test type and timeframes (daily, weekly, all-time).</p>
-                        </div>
-                    </div>
-                     <div className="flex items-start gap-3">
-                        <History className="h-5 w-5 text-primary mt-1" />
-                        <div>
-                            <h4 className="font-semibold text-foreground">User Profiles & Progress Tracking</h4>
-                            <p>Registered users can track stats, view personal bests, and see their performance history over time.</p>
-                        </div>
-                    </div>
-                     <div className="flex items-start gap-3">
-                        <Star className="h-5 w-5 text-primary mt-1" />
-                        <div>
-                            <h4 className="font-semibold text-foreground">Customizable Experience</h4>
-                            <p>Change the app's language, typing sounds, and visual themes to suit your preferences.</p>
-                        </div>
-                    </div>
-                </div>
-            </CardContent>
+        <Card className="mb-12 text-left bg-card/30">
+          <CardHeader>
+              <CardTitle className="text-2xl font-headline text-center">About TypeZilla</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 text-muted-foreground">
+              <p>
+                  Experience realistic typing tests, get AI-powered feedback, and track your progress to become a faster, more accurate typist. TypeZilla is designed to be a comprehensive platform for typists of all skill levels.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 pt-4">
+                  <div className="flex items-start gap-3">
+                      <Zap className="h-5 w-5 text-primary mt-1" />
+                      <div>
+                          <h4 className="font-semibold text-foreground">Varied Typing Challenges</h4>
+                          <p>Choose from word-based tests with simple, intermediate, and expert difficulties, or time-based challenges.</p>
+                      </div>
+                  </div>
+                   <div className="flex items-start gap-3">
+                      <Users className="h-5 w-5 text-primary mt-1" />
+                      <div>
+                          <h4 className="font-semibold text-foreground">Social Features</h4>
+                          <p>Users can view each other's public profiles and send friend requests to build a community.</p>
+                      </div>
+                  </div>
+                   <div className="flex items-start gap-3">
+                      <BrainCircuit className="h-5 w-5 text-primary mt-1" />
+                      <div>
+                          <h4 className="font-semibold text-foreground">AI-Powered Analysis</h4>
+                          <p>After each test, an AI coach provides personalized feedback on your performance, highlighting strengths and offering tips.</p>
+                      </div>
+                  </div>
+                   <div className="flex items-start gap-3">
+                      <Globe className="h-5 w-5 text-primary mt-1" />
+                      <div>
+                          <h4 className="font-semibold text-foreground">Global Leaderboards</h4>
+                          <p>Compete with users worldwide, with leaderboards filtered by test type and timeframes (daily, weekly, all-time).</p>
+                      </div>
+                  </div>
+                   <div className="flex items-start gap-3">
+                      <History className="h-5 w-5 text-primary mt-1" />
+                      <div>
+                          <h4 className="font-semibold text-foreground">User Profiles & Progress Tracking</h4>
+                          <p>Registered users can track stats, view personal bests, and see their performance history over time.</p>
+                      </div>
+                  </div>
+                   <div className="flex items-start gap-3">
+                      <Star className="h-5 w-5 text-primary mt-1" />
+                      <div>
+                          <h4 className="font-semibold text-foreground">Customizable Experience</h4>
+                          <p>Change the app's language, typing sounds, and visual themes to suit your preferences.</p>
+                      </div>
+                  </div>
+              </div>
+          </CardContent>
+        </Card>
+
+        <AboutChart data={wpmDistribution} error={chartError} />
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mt-12 w-full">
+          <Card className="bg-card/50 backdrop-blur-sm border-primary/20">
+              <CardHeader>
+                  <CardTitle className="text-xl font-headline">{t.aboutTotalTestsStarted}</CardTitle>
+                  <CardDescription className="text-muted-foreground">{t.aboutTotalTestsStartedDescription}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                  <p className="text-4xl font-bold text-primary">{isClient ? formatLargeNumber(stats.totalTestStarted) : '0'}</p>
+              </CardContent>
           </Card>
-
-          <AboutChart data={wpmDistribution} error={chartError} />
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mt-12 w-full">
-            <Card className="bg-card/50 backdrop-blur-sm border-primary/20">
-                <CardHeader>
-                    <CardTitle className="text-xl font-headline">{t.aboutTotalTestsStarted}</CardTitle>
-                    <CardDescription className="text-muted-foreground">{t.aboutTotalTestsStartedDescription}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-4xl font-bold text-primary">{isClient ? formatLargeNumber(stats.totalTestStarted) : '0'}</p>
-                </CardContent>
-            </Card>
-             <Card className="bg-card/50 backdrop-blur-sm border-primary/20">
-                <CardHeader>
-                    <CardTitle className="text-xl font-headline">{t.aboutTotalTestsCompleted}</CardTitle>
-                    <CardDescription className="text-muted-foreground">{t.aboutTotalTestsCompletedDescription}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-4xl font-bold text-primary">{isClient ? formatLargeNumber(stats.totalTestsCompleted) : '0'}</p>
-                </CardContent>
-            </Card>
-            <Card className="bg-card/50 backdrop-blur-sm border-primary/20">
-                <CardHeader>
-                    <CardTitle className="text-xl font-headline">{t.aboutTotalTimeTyping}</CardTitle>
-                    <CardDescription className="text-muted-foreground">{t.aboutTotalTimeTypingDescription}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-4xl font-bold text-primary">{isClient ? formatTypingTime(stats.totalTypingTimeInSeconds) : '00:00:00'}</p>
-                </CardContent>
-            </Card>
-          </div>
+           <Card className="bg-card/50 backdrop-blur-sm border-primary/20">
+              <CardHeader>
+                  <CardTitle className="text-xl font-headline">{t.aboutTotalTestsCompleted}</CardTitle>
+                  <CardDescription className="text-muted-foreground">{t.aboutTotalTestsCompletedDescription}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                  <p className="text-4xl font-bold text-primary">{isClient ? formatLargeNumber(stats.totalTestsCompleted) : '0'}</p>
+              </CardContent>
+          </Card>
+          <Card className="bg-card/50 backdrop-blur-sm border-primary/20">
+              <CardHeader>
+                  <CardTitle className="text-xl font-headline">{t.aboutTotalTimeTyping}</CardTitle>
+                  <CardDescription className="text-muted-foreground">{t.aboutTotalTimeTypingDescription}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                  <p className="text-4xl font-bold text-primary">{isClient ? formatTypingTime(stats.totalTypingTimeInSeconds) : '00:00:00'}</p>
+              </CardContent>
+          </Card>
         </div>
-      </main>
-
-      <TypingTip />
-    </div>
+      </div>
+    </main>
   );
 }

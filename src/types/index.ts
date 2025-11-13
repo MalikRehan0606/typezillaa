@@ -1,5 +1,4 @@
 
-
 import type { LucideIcon } from "lucide-react";
 
 export type TestStatus = "pending" | "active" | "completed";
@@ -35,6 +34,15 @@ export type Match = {
     winnerId?: string;
     player1Ready?: boolean;
     player2Ready?: boolean;
+};
+
+export type FriendRequest = {
+  id: string;
+  fromUserId: string;
+  fromUserName: string;
+  toUserId: string;
+  status: 'pending' | 'accepted' | 'declined';
+  createdAt: any; // Firestore Timestamp
 };
 
 
@@ -133,6 +141,7 @@ export type UserProfileData = {
     currentStreak?: number;
     longestStreak?: number;
     lastTestTimestamp?: any; // Firestore timestamp
+    friends?: string[];
     presence?: UserPresence;
     challengeStats?: ChallengeStats;
     isBanned?: boolean;
@@ -160,5 +169,3 @@ export type Achievement = {
     unlocked: boolean;
     check: (history: TestHistoryEntry[], profileData: UserProfileData | null) => boolean;
 }
-
-    

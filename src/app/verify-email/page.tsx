@@ -7,12 +7,12 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth-provider';
 import { sendEmailVerification } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, MailCheck, LogOutIcon } from 'lucide-react';
 import { TypingTip } from '@/components/typing-tip';
 import { useLanguage } from '@/contexts/language-provider';
-import Image from 'next/image';
+import { Header } from '@/components/header';
 
 const COOLDOWN_SECONDS = 60;
 
@@ -82,20 +82,7 @@ export default function VerifyEmailPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
-      <header className="py-2 px-6 md:px-8 border-b border-border">
-        <div className="container mx-auto flex justify-between items-center">
-          <Link href="/" className="flex items-center">
-            <Image src={`/sounds/logo.png/logo.png?v=${new Date().getTime()}`} alt="TypeZilla Logo" width={140} height={32} />
-          </Link>
-          <div className="flex items-center gap-4">
-            {user && (
-              <Button variant="outline" onClick={logout}>
-                <LogOutIcon className="mr-2 h-4 w-4" /> {t.logout}
-              </Button>
-            )}
-          </div>
-        </div>
-      </header>
+      <Header />
       <main className="flex-grow container mx-auto flex flex-col items-center justify-center p-4">
         <Card className="w-full max-w-md shadow-xl">
           <CardHeader className="items-center text-center">

@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
@@ -386,15 +385,18 @@ export const TypingChallenge: React.FC<TypingChallengeProps> = ({ level, wordCou
         let newLongestStreak = latestUserData.longestStreak || 0;
 
         if (!lastTestDate) {
+          // First test ever
           newCurrentStreak = 1;
         } else {
-          const diffDays = (today.getTime() - lastTestDate.getTime()) / (1000 * 3600 * 24);
+          const diffDays = Math.round((today.getTime() - lastTestDate.getTime()) / (1000 * 3600 * 24));
           if (diffDays === 1) {
+            // Consecutive day
             newCurrentStreak++;
           } else if (diffDays > 1) {
-            newCurrentStreak = 1; // Reset streak
+            // Missed a day or more
+            newCurrentStreak = 1; // Reset streak to 1 for the new day
           }
-          // If diffDays is 0, streak remains the same
+          // If diffDays is 0, they already practiced today, so streak is unchanged.
         }
         
         if (newCurrentStreak > newLongestStreak) {
@@ -562,6 +564,7 @@ export const TypingChallenge: React.FC<TypingChallengeProps> = ({ level, wordCou
         const statsDocRef = doc(db, 'globalStats', 'main');
         await setDoc(statsDocRef, {
             totalTestsCompleted: increment(1),
+            totalTypingTimeInSeconds: increment(testDuration),
         }, { merge: true }).catch(err => console.warn("Could not update global stats", err));
       }
 

@@ -7,25 +7,20 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { GithubIcon, ArrowLeftIcon, LogOutIcon, Loader2, Trophy, Globe, CalendarDays, Sun, Hourglass, User as UserIcon, Timer, MenuIcon, Code, RocketIcon } from "lucide-react";
-import type { LeaderboardEntry, UserProfileData, Achievement } from '@/types';
+import { ArrowLeftIcon, Loader2, Trophy, Globe, CalendarDays, Sun, Hourglass, RocketIcon } from "lucide-react";
+import type { LeaderboardEntry, UserProfileData } from '@/types';
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { db } from "@/lib/firebase";
-import { collection, query, orderBy, getDocs, limit, where, collectionGroup } from "firebase/firestore";
-import { useAuth } from '@/components/auth-provider';
-import { SettingsDialog } from '@/components/settings-dialog';
+import { collection, query, orderBy, getDocs, limit, where } from "firebase/firestore";
 import { TypingTip } from '@/components/typing-tip';
 import { useLanguage } from '@/contexts/language-provider';
-import { LanguageSelector } from '@/components/language-selector';
-import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
-import Image from 'next/image';
 import { AchievementBadge } from '@/components/achievement-badge';
 import { usePioneerUsers } from '@/hooks/use-pioneer-users';
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { VoidminBadge } from '@/components/voidmin-badge';
 import { ALL_ACHIEVEMENTS } from '@/lib/achievements';
-
+import { Header } from '@/components/header';
 
 type EnrichedLeaderboardEntry = LeaderboardEntry & Partial<Pick<UserProfileData, 'unlockedAchievements'>>;
 
@@ -42,7 +37,6 @@ const LeaderboardTable: React.FC<{ data: EnrichedLeaderboardEntry[], t: any, isT
     'consistency_2',
     'flawless_simple',
   ]);
-
 
   const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleDateString();
@@ -150,7 +144,6 @@ const LeaderboardTable: React.FC<{ data: EnrichedLeaderboardEntry[], t: any, isT
 };
 
 export default function LeaderboardPage() {
-  const creatorGitHubUrl = "https://github.com/MalikRehan0606";
   const [leaderboardData, setLeaderboardData] = useState<{ [key in DifficultyLevel | 'time']: EnrichedLeaderboardEntry[] }>({
     simple: [],
     intermediate: [],
@@ -162,12 +155,10 @@ export default function LeaderboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  const { user, logout, isAnonymous } = useAuth();
   const { t, language: currentLang } = useLanguage();
   
   const [dateRange, setDateRange] = useState('');
   const [countdown, setCountdown] = useState('');
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
   
   const processAndRankScores = (entries: EnrichedLeaderboardEntry[], selectedTimeframe: 'all-time' | 'weekly' | 'daily'): EnrichedLeaderboardEntry[] => {
     const bestScoresByUser = new Map<string, EnrichedLeaderboardEntry>();
@@ -387,78 +378,11 @@ export default function LeaderboardPage() {
       }
   }
 
-   const NavLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
-    <Button asChild variant="ghost" className="w-full justify-start text-base" onClick={() => setIsSheetOpen(false)}>
-      <Link href={href}>{children}</Link>
-    </Button>
-  );
-
-  const headerContent = (
-      <>
-          <div className="hidden md:flex items-center gap-4">
-            <LanguageSelector />
-            <SettingsDialog />
-            {user && !isAnonymous ? (
-              <>
-                <Button asChild variant="outline" className="hover:text-primary hover:bg-background">
-                  <Link href="/profile">
-                    <UserIcon className="mr-2 h-4 w-4" />
-                    Profile
-                  </Link>
-                </Button>
-                <Button variant="outline" onClick={logout} className="hover:text-primary hover:bg-background">
-                  <LogOutIcon className="mr-2 h-4 w-4" /> {t.logout}
-                </Button>
-              </>
-            ) : (
-                <Button asChild variant="outline" className="hover:text-primary hover:bg-background">
-                  <Link href="/profile">
-                    <UserIcon className="mr-2 h-4 w-4" />
-                    Profile
-                  </Link>
-                </Button>
-            )}
-            <a
-              href={creatorGitHubUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-primary transition-colors"
-              aria-label="View creator's profile on GitHub"
-            >
-              <GithubIcon className="h-6 w-6" />
-            </a>
-          </div>
-          <div className="md:hidden">
-            <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                <SheetTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                        <MenuIcon />
-                        <span className="sr-only">Open menu</span>
-                    </Button>
-                </SheetTrigger>
-                <SheetContent side="right" className="w-3/4">
-                    <div className="flex flex-col gap-4 py-6">
-                        
-                        <NavLink href="/profile">Profile</NavLink>
-                    </div>
-                </SheetContent>
-            </Sheet>
-        </div>
-      </>
-  );
-
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground">
-      <header className="py-2 px-6 md:px-8 border-b border-border sticky top-0 z-50 bg-background/80 backdrop-blur-md">
-        <div className="container mx-auto flex justify-between items-center">
-          <Link href="/" className="flex items-center">
-            <Image src={`/sounds/logo.png/logo.png?v=${new Date().getTime()}`} alt="TypeZilla Logo" width={140} height={32} />
-          </Link>
-          {headerContent}
-        </div>
-      </header>
+    <div className="flex flex-col min-h-screen text-foreground">
+      <Header />
 
-      <main className="flex-grow container mx-auto flex flex-col items-center p-4 md:p-8">
+      <main className="flex-grow container mx-auto flex flex-col items-center p-4 md:p-8 mt-20">
         <section className="py-12 md:py-16 w-full max-w-6xl">
           <div className="flex items-center justify-between mb-8">
             <Link href="/" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center">
@@ -541,5 +465,3 @@ export default function LeaderboardPage() {
     </div>
   );
 }
-
-    

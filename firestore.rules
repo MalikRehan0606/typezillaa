@@ -54,7 +54,7 @@ service cloud.firestore {
     }
     
     match /friendRequests/{requestId} {
-        allow read: if isSignedIn();
+        allow read: if isSignedIn() && (resource.data.toUserId == request.auth.uid || resource.data.fromUserId == request.auth.uid);
         // Allow creation if the sender is the current user
         allow create: if isSignedIn() && request.resource.data.fromUserId == request.auth.uid;
         // Allow updates (accept/decline) by the recipient

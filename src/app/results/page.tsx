@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useEffect, useState, useMemo } from 'react';
@@ -10,10 +9,7 @@ import { Loader2, RefreshCwIcon, AlertTriangleIcon, HistoryIcon, XIcon, ChevronR
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, ReferenceDot } from 'recharts';
 import type { TestResult } from '@/types';
 import { useToast } from '@/hooks/use-toast';
-import { SettingsDialog } from '@/components/settings-dialog';
-import { TypingTip } from '@/components/typing-tip';
 import { useLanguage } from '@/contexts/language-provider';
-import { LanguageSelector } from '@/components/language-selector';
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, AlertDialogCancel } from "@/components/ui/alert-dialog";
 import { Badge } from '@/components/ui/badge';
 import { WordsHistory } from '@/components/words-history';
@@ -23,7 +19,8 @@ import { analyzeTyping, type TypingAnalysisOutput } from '@/ai/flows/typing-anal
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useAuth } from '@/components/auth-provider';
 import { cn } from '@/lib/utils';
-import Image from 'next/image';
+import { Header } from '@/components/header';
+import { TypingTip } from '@/components/typing-tip';
 
 
 const LATEST_RESULT_KEY = "latestTestResult";
@@ -232,18 +229,7 @@ export default function ResultsPage() {
 
   return (
     <div className="flex min-h-screen flex-col items-center bg-background text-foreground font-mono">
-      <header className="py-2 px-6 md:px-8 border-b border-border sticky top-0 z-50 bg-background/80 backdrop-blur-md w-full">
-        <div className="container mx-auto flex justify-between items-center">
-          <Link href="/" className="flex items-center">
-            <Image src={`/sounds/logo.png/logo.png?v=${new Date().getTime()}`} alt="TypeZilla Logo" width={140} height={32} />
-          </Link>
-          <div className="flex items-center gap-4">
-            <LanguageSelector />
-            <SettingsDialog />
-          </div>
-        </div>
-      </header>
-
+      <Header />
       <main className="w-full max-w-6xl flex-grow flex flex-col items-center justify-center p-4 md:p-8">
         {startReplay ? (
              <TestReplay 

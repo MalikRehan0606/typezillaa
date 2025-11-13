@@ -1,30 +1,26 @@
 
-
 "use client";
 
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { GithubIcon, ArrowLeftIcon, Loader2, LogOutIcon, UserIcon, TrophyIcon, HistoryIcon,LogInIcon, UserPlusIcon, StarIcon, FlagIcon, BarChart, FlameIcon } from "lucide-react";
-import { useState, useEffect, useRef } from 'react';
+import { Loader2, UserIcon, TrophyIcon, LogInIcon, UserPlusIcon, StarIcon, FlameIcon } from "lucide-react";
+import { useState, useEffect } from 'react';
 import type { TestHistoryEntry, Achievement, UserProfileData } from '@/types';
-import { db, auth, storage } from "@/lib/firebase";
-import { collection, query, where, orderBy, limit, onSnapshot, doc, setDoc, getDoc, serverTimestamp, updateDoc, collectionGroup, getDocs, Timestamp } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { collection, query, orderBy, limit, onSnapshot, doc, Timestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/components/auth-provider';
-import { SettingsDialog } from './settings-dialog';
-import { TypingTip } from './typing-tip';
 import { useLanguage } from '@/contexts/language-provider';
-import { LanguageSelector } from './language-selector';
 import { cn } from '@/lib/utils';
-import { useRouter } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { checkAchievements, ALL_ACHIEVEMENTS } from '@/lib/achievements';
+import { ALL_ACHIEVEMENTS } from '@/lib/achievements';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import Image from 'next/image';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
+import { Header } from '@/components/header';
+import { TypingTip } from '@/components/typing-tip';
 
 
 const ProfileChart = dynamic(() => import('@/components/profile-chart'), {
@@ -78,9 +74,7 @@ const PersonalBestCard: React.FC<{ title: string, pbs: { [key: string]: {wpm: nu
 
 export function ProfilePageClient() {
   const { toast } = useToast();
-  const { user, loading, logout, isAnonymous } = useAuth();
-  const { t } = useLanguage();
-  const router = useRouter();
+  const { user, loading, isAnonymous } = useAuth();
   const [profileData, setProfileData] = useState<UserProfileData | null>(null);
   const [history, setHistory] = useState<TestHistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -182,7 +176,7 @@ export function ProfilePageClient() {
           unsubscribeProfile();
           unsubscribeHistory();
       }
-  }, [user, loading, isAnonymous, router, toast]);
+  }, [user, loading, isAnonymous, toast]);
 
   if (loading) {
       return (
@@ -198,46 +192,11 @@ export function ProfilePageClient() {
       return `Joined ${date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}`;
   }
   
-  const formatTypingTime = (totalSeconds: number = 0) => {
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = Math.floor(totalSeconds % 60);
-    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-  };
-
-  const headerContent = (
-    <header className="py-2 px-6 md:px-8 border-b border-border sticky top-0 z-50 bg-background/80 backdrop-blur-md">
-      <div className="container mx-auto flex justify-between items-center">
-        <Link href="/" className="flex items-center">
-          <Image src={`/sounds/logo.png/logo.png?v=${new Date().getTime()}`} alt="TypeZilla Logo" width={140} height={32} />
-        </Link>
-        <div className="flex items-center gap-4">
-          <LanguageSelector />
-          <SettingsDialog />
-          {user && !isAnonymous && (
-            <Button variant="outline" onClick={logout} className="hover:text-primary hover:bg-background">
-              <LogOutIcon className="mr-2 h-4 w-4" /> {t.logout}
-            </Button>
-          )}
-          <a
-            href={"https://github.com/MalikRehan0606"}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-muted-foreground hover:text-primary transition-colors"
-            aria-label="View creator's profile on GitHub"
-          >
-            <GithubIcon className="h-6 w-6" />
-          </a>
-        </div>
-      </div>
-    </header>
-  );
-  
   const unlockedAchievements = achievements.filter(ach => ach.unlocked);
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground font-mono">
-      {headerContent}
+      <Header />
       
       <main className="flex-grow container mx-auto flex flex-col items-center p-4 md:p-8">
         <div className="w-full max-w-6xl">
