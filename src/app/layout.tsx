@@ -3,6 +3,7 @@ import { Toaster } from "@/components/ui/toaster"
 import './globals.css';
 import { AuthProvider } from '@/components/auth-provider';
 import { LanguageProvider } from '@/contexts/language-provider';
+import { VisitProvider } from '@/contexts/visit-provider';
 
 export const metadata: Metadata = {
   title: 'TypeZilla',
@@ -35,7 +36,9 @@ export default function RootLayout({
         <div className="relative min-h-screen flex flex-col">
           <LanguageProvider>
             <AuthProvider>
-              {children}
+              <VisitProvider>
+                {children}
+              </VisitProvider>
               <Toaster />
             </AuthProvider>
           </LanguageProvider>

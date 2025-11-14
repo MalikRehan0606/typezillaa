@@ -21,10 +21,9 @@ import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/comp
 import { VoidminBadge } from '@/components/voidmin-badge';
 import { ALL_ACHIEVEMENTS } from '@/lib/achievements';
 import { Header } from '@/components/header';
+import { CREATOR_USER_ID } from '@/lib/config';
 
 type EnrichedLeaderboardEntry = LeaderboardEntry & Partial<Pick<UserProfileData, 'unlockedAchievements'>>;
-
-const CREATOR_USER_ID = "xFii0i0yBtgNkbXLOdvTosvU0OF3";
 
 const LeaderboardTable: React.FC<{ data: EnrichedLeaderboardEntry[], t: any, isTimeMode?: boolean }> = ({ data, t, isTimeMode = false }) => {
   const pioneerUserIds = usePioneerUsers();

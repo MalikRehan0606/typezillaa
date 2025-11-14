@@ -242,104 +242,102 @@ export function PublicProfilePageClient({ userId }: { userId: string }) {
   }
 
   return (
-    <main className="flex-grow container mx-auto flex flex-col items-center p-4 md:p-8 mt-20">
-      <div className="w-full max-w-6xl">
-          {!profile || error ? (
-              <Card className="text-center py-12 px-6">
-                  <CardHeader>
-                  <AlertTriangleIcon className="mx-auto h-12 w-12 text-destructive" />
-                  <CardTitle className="text-2xl font-headline mt-4">Profile Not Found</CardTitle>
-                  <CardDescription className="max-w-md mx-auto">
-                      {error || "Could not retrieve this user's profile information."}
-                  </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                      <Button asChild variant="outline">
-                          <Link href="/leaderboard">
-                              <ArrowLeftIcon className="mr-2 h-4 w-4" />
-                              Back to Leaderboard
-                          </Link>
-                      </Button>
-                  </CardContent>
-            </Card>
-          ) : (
-              <>
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-8 items-start">
-                      <div className="md:col-span-1 flex flex-col gap-4">
-                          <Card className="p-4">
-                              <div className="flex items-center gap-4">
-                                  <Avatar className="h-20 w-20">
-                                      <AvatarImage src={profile?.photoURL} alt={profile?.name} />
-                                      <AvatarFallback>
-                                          <UserIcon className="h-10 w-10 text-primary" />
-                                      </AvatarFallback>
-                                  </Avatar>
-                                  <div className="flex-grow">
-                                    <h2 className="text-2xl font-bold">{profile?.name}</h2>
-                                    <p className="text-xs text-muted-foreground">{formatJoinDate(profile?.createdAt)}</p>
-                                  </div>
-                              </div>
-                              <div className="mt-4 flex flex-col gap-2">
-                                  {friendStatus !== 'self' && (
-                                   <div className="flex gap-2">
-                                      {friendStatus === 'not_friends' && (
-                                          <Button className="w-full" onClick={handleAddFriend} disabled={isFriendActionLoading || !currentUser || isAnonymous}>
-                                              {isFriendActionLoading ? <Loader2 className="mr-2 animate-spin" /> : <UserPlus className="mr-2" />}
-                                              Add Friend
+    <div className="w-full max-w-6xl">
+        {!profile || error ? (
+            <Card className="text-center py-12 px-6">
+                <CardHeader>
+                <AlertTriangleIcon className="mx-auto h-12 w-12 text-destructive" />
+                <CardTitle className="text-2xl font-headline mt-4">Profile Not Found</CardTitle>
+                <CardDescription className="max-w-md mx-auto">
+                    {error || "Could not retrieve this user's profile information."}
+                </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Button asChild variant="outline">
+                        <Link href="/leaderboard">
+                            <ArrowLeftIcon className="mr-2 h-4 w-4" />
+                            Back to Leaderboard
+                        </Link>
+                    </Button>
+                </CardContent>
+          </Card>
+        ) : (
+            <>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-8 items-start">
+                    <div className="md:col-span-1 flex flex-col gap-4">
+                        <Card className="p-4">
+                            <div className="flex items-center gap-4">
+                                <Avatar className="h-20 w-20">
+                                    <AvatarImage src={profile?.photoURL} alt={profile?.name} />
+                                    <AvatarFallback>
+                                        <UserIcon className="h-10 w-10 text-primary" />
+                                    </AvatarFallback>
+                                </Avatar>
+                                <div className="flex-grow">
+                                  <h2 className="text-2xl font-bold">{profile?.name}</h2>
+                                  <p className="text-xs text-muted-foreground">{formatJoinDate(profile?.createdAt)}</p>
+                                </div>
+                            </div>
+                            <div className="mt-4 flex flex-col gap-2">
+                                {friendStatus !== 'self' && (
+                                 <div className="flex gap-2">
+                                    {friendStatus === 'not_friends' && (
+                                        <Button className="w-full" onClick={handleAddFriend} disabled={isFriendActionLoading || !currentUser || isAnonymous}>
+                                            {isFriendActionLoading ? <Loader2 className="mr-2 animate-spin" /> : <UserPlus className="mr-2" />}
+                                            Add Friend
+                                        </Button>
+                                    )}
+                                    {friendStatus === 'pending' && <Button className="w-full" disabled>Request Sent</Button>}
+                                    {friendStatus === 'friends' && (
+                                        <Button className="w-full" onClick={handleChallenge} disabled={!currentUser || currentUser.uid === userId}>
+                                            <Swords className="mr-2" /> Challenge
+                                        </Button>
+                                    )}
+                                    <TooltipProvider>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <Button variant="ghost" size="icon" onClick={handleReportUser} disabled={hasReported || !currentUser || isAnonymous}>
+                                            <FlagIcon className="h-5 w-5 text-muted-foreground hover:text-destructive" />
                                           </Button>
-                                      )}
-                                      {friendStatus === 'pending' && <Button className="w-full" disabled>Request Sent</Button>}
-                                      {friendStatus === 'friends' && (
-                                          <Button className="w-full" onClick={handleChallenge} disabled={!currentUser || currentUser.uid === userId}>
-                                              <Swords className="mr-2" /> Challenge
-                                          </Button>
-                                      )}
-                                      <TooltipProvider>
-                                        <Tooltip>
-                                          <TooltipTrigger asChild>
-                                            <Button variant="ghost" size="icon" onClick={handleReportUser} disabled={hasReported || !currentUser || isAnonymous}>
-                                              <FlagIcon className="h-5 w-5 text-muted-foreground hover:text-destructive" />
-                                            </Button>
-                                          </TooltipTrigger>
-                                          <TooltipContent>
-                                              {!currentUser || isAnonymous ? <p>Login to report user</p> : hasReported ? <p>User already reported</p> : <p>Report User</p>}
-                                          </TooltipContent>
-                                        </Tooltip>
-                                      </TooltipProvider>
-                                   </div>
-                                  )}
-                              </div>
-                          </Card>
-                      </div>
-                     <div className="md:col-span-3 grid grid-cols-4 gap-4">
-                         <StatCard title="current streak" value={profile?.currentStreak || 0} valueClassName="text-orange-400" icon={<FlameIcon className="h-4 w-4 text-muted-foreground" />} />
-                         <StatCard title="tests started" value={profile?.testsStarted || 0}/>
-                         <StatCard title="tests completed" value={profile?.testsCompleted || 0}/>
-                         <StatCard title="time typing" value={formatTypingTime(profile?.totalTimeTyping)} icon={<BarChart className="h-4 w-4 text-muted-foreground" />} />
-                      </div>
-                  </div>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            {!currentUser || isAnonymous ? <p>Login to report user</p> : hasReported ? <p>User already reported</p> : <p>Report User</p>}
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    </TooltipProvider>
+                                 </div>
+                                )}
+                            </div>
+                        </Card>
+                    </div>
+                   <div className="md:col-span-3 grid grid-cols-4 gap-4">
+                       <StatCard title="current streak" value={profile?.currentStreak || 0} valueClassName="text-orange-400" icon={<FlameIcon className="h-4 w-4 text-muted-foreground" />} />
+                       <StatCard title="tests started" value={profile?.testsStarted || 0}/>
+                       <StatCard title="tests completed" value={profile?.testsCompleted || 0}/>
+                       <StatCard title="time typing" value={formatTypingTime(profile?.totalTimeTyping)} icon={<BarChart className="h-4 w-4 text-muted-foreground" />} />
+                    </div>
+                </div>
 
-                  <div className="grid md:grid-cols-2 gap-8 mt-8">
-                      <PersonalBestCard 
-                          title="Personal Bests (Words)"
-                          pbs={{
-                              "15 words": profile?.personalBests?.words?.[15],
-                              "30 words": profile?.personalBests?.words?.[30],
-                              "45 words": profile?.personalBests?.words?.[45],
-                          }}
-                      />
-                      <PersonalBestCard 
-                          title="Personal Bests (Time)"
-                          pbs={{
-                              "15 sec": profile?.personalBests?.time?.[15],
-                              "30 sec": profile?.personalBests?.time?.[30],
-                              "60 sec": profile?.personalBests?.time?.[60],
-                          }}
-                      />
-                  </div>
-              </>
-          )}
-      </div>
-    </main>
+                <div className="grid md:grid-cols-2 gap-8 mt-8">
+                    <PersonalBestCard 
+                        title="Personal Bests (Words)"
+                        pbs={{
+                            "15 words": profile?.personalBests?.words?.[15],
+                            "30 words": profile?.personalBests?.words?.[30],
+                            "45 words": profile?.personalBests?.words?.[45],
+                        }}
+                    />
+                    <PersonalBestCard 
+                        title="Personal Bests (Time)"
+                        pbs={{
+                            "15 sec": profile?.personalBests?.time?.[15],
+                            "30 sec": profile?.personalBests?.time?.[30],
+                            "60 sec": profile?.personalBests?.time?.[60],
+                        }}
+                    />
+                </div>
+            </>
+        )}
+    </div>
   );
 }

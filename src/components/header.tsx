@@ -13,6 +13,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { FriendsSidebar } from '@/components/friends-sidebar';
 import { usePathname } from 'next/navigation';
+import { TotalVisitsBadge } from './total-visits-badge';
 
 const CREATOR_GITHUB_URL = "https://github.com/MalikRehan0606";
 
@@ -118,9 +119,12 @@ export function Header() {
 
   return (
     <header className="fixed top-0 z-50 w-full py-2 px-6 md:px-8 flex justify-between items-center">
-        <Link href="/" className="flex items-center">
-          <Image src="/typezillalogo.png" alt="TypeZilla Logo" width={140} height={32} unoptimized />
-        </Link>
+        <div className="flex items-center gap-4">
+            <Link href="/" className="flex items-center">
+              <Image src="/typezillalogo.png" alt="TypeZilla Logo" width={140} height={32} unoptimized />
+            </Link>
+            <TotalVisitsBadge />
+        </div>
         <div className="flex items-center gap-2">
             {desktopNav}
             {mobileNav}
