@@ -606,91 +606,91 @@ export const TypingChallenge: React.FC<TypingChallengeProps> = ({ level, wordCou
     return wordIndex;
   };
 
-  const processKeystroke = useCallback((key: string, code: string) => {
-    if (status === "pending") {
+ const handleInput = (e: React.FormEvent<HTMLInputElement>) => {
+    if (status === "completed" || isLoading) return;
+
+    if (status === 'pending') {
       startTest();
     }
+    const typedValue = e.currentTarget.value;
     
-    setActiveKey(code);
     const time = startTime ? Date.now() - startTime : 0;
-    setKeystrokeHistory(prev => [...prev, { key, time, code }]);
+    setKeystrokeHistory(prev => [...prev, { key: typedValue.slice(-1), time, code: 'Unknown' }]); // Code is less reliable here
 
-    if (code === 'Backspace') {
-      if (currentIndex > 0) {
-        setLastErrorIndex(null);
-        const prevCharIndex = currentIndex - 1;
-        if (userInput[prevCharIndex] === ' ' && textToType[prevCharIndex] === ' ') {
-          triggerSound("incorrect");
-          return;
+    const newErrorIndices = new Set<number>();
+    const newWordsWithErrors = new Set<number>();
+    let correctStrokes = 0;
+    let incorrectStrokes = keystrokes.incorrect; // Assume incorrect strokes are handled by backspace/re-typing
+
+    for(let i=0; i < typedValue.length; i++) {
+        const expectedChar = textToType[i];
+        const typedChar = typedValue[i];
+
+        if (typedChar === expectedChar) {
+            correctStrokes++;
+        } else {
+            newErrorIndices.add(i);
+            const wordIndex = getWordIndexFromCharIndex(i);
+            newWordsWithErrors.add(wordIndex);
         }
-
-        const newErrorIndices = new Set(errorIndices);
-        newErrorIndices.delete(prevCharIndex);
-        setErrorIndices(newErrorIndices);
-        setUserInput((prev) => prev.slice(0, -1));
-        setCurrentIndex((prev) => prev - 1);
-      }
-      return;
     }
-
-    const isModifier = ['Shift', 'Control', 'Alt', 'Meta', 'CapsLock', 'Tab', 'Escape'].includes(key);
-    if (key.length > 1 && !isModifier) return;
-    if (isModifier) return;
-
-    if (currentIndex < textToType.length) {
-      const expectedChar = textToType[currentIndex];
-      if (key === expectedChar) {
+    
+    if (typedValue.length > userInput.length && newErrorIndices.has(typedValue.length - 1)) {
+        // A new mistake was made
+        const lastCharIndex = typedValue.length - 1;
+        setLastErrorIndex(lastCharIndex);
+        setIsShaking(true);
+        setTimeout(() => setIsShaking(false), 500);
+        triggerSound("incorrect");
+        setErrorKeyVisual('Unknown'); // We don't have the key code here
+        setKeystrokes(prev => ({ ...prev, incorrect: prev.incorrect + 1 }));
+        if (startTime) setErrorTimestamps(prev => [...prev, Math.floor((Date.now() - startTime) / 1000)]);
+    } else if (typedValue.length < userInput.length) {
+        // Backspace was used
+        setLastErrorIndex(null);
+    } else if (typedValue.length > userInput.length) {
+        // Correct character typed
         setLastErrorIndex(null);
         triggerSound("correct");
         setErrorKeyVisual(null);
         setKeystrokes(prev => ({ ...prev, correct: prev.correct + 1 }));
-      } else {
-        const wordIndex = getWordIndexFromCharIndex(currentIndex);
-        setWordsWithErrors(prev => new Set(prev).add(wordIndex));
-
-        setLastErrorIndex(currentIndex);
-        setIsShaking(true);
-        setTimeout(() => setIsShaking(false), 500);
-        triggerSound("incorrect");
-        setErrorIndices(prev => new Set(prev).add(currentIndex));
-        setErrorKeyVisual(code);
-        setKeystrokes(prev => ({ ...prev, incorrect: prev.incorrect + 1 }));
-        if (startTime) setErrorTimestamps(prev => [...prev, Math.floor((Date.now() - startTime) / 1000)]);
-      }
-      const newUserInput = userInput + key;
-      setUserInput(newUserInput);
-      const newCurrentIndex = currentIndex + 1;
-      setCurrentIndex(newCurrentIndex);
-
-      if (newCurrentIndex >= textToType.length && level !== 'time' && !isMatchMode) {
-        finishTest();
-      } else if (newCurrentIndex >= textToType.length && isMatchMode) {
-        finishTest();
-      }
     }
-  }, [currentIndex, textToType, triggerSound, startTime, userInput, finishTest, errorIndices, level, status, startTest, isMatchMode]);
 
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if (isLoading || status === "completed" || showSignupPrompt || showSaveScorePrompt) return;
-    const { key, code } = e;
-    if (code === "Space") e.preventDefault();
+
+    setUserInput(typedValue);
+    setCurrentIndex(typedValue.length);
+    setErrorIndices(newErrorIndices);
+    setWordsWithErrors(newWordsWithErrors);
     
+    if (typedValue.length >= textToType.length && level !== 'time' && !isMatchMode) {
+      finishTest();
+    } else if (typedValue.length >= textToType.length && isMatchMode) {
+      finishTest();
+    }
+};
+
+const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (status === 'completed' || isLoading) return;
+
     if (status === 'pending') {
       startTest();
     }
     
-    if (key.length === 1 || key === 'Backspace') {
-        processKeystroke(key, code);
-    }
-}, [isLoading, status, showSignupPrompt, showSaveScorePrompt, startTest, processKeystroke]);
+    const { key, code } = e;
+    setActiveKey(code);
+    const time = startTime ? Date.now() - startTime : 0;
+    setKeystrokeHistory(prev => [...prev, { key, time, code }]);
 
-
-  useEffect(() => {
-    if (!isLoading) {
-      document.addEventListener("keydown", handleKeyDown);
-      return () => document.removeEventListener("keydown", handleKeyDown);
+    if (key === 'Backspace') {
+       if (userInput.length === 0) return;
+       const lastCharIndex = userInput.length - 1;
+       const newErrorIndices = new Set(errorIndices);
+       newErrorIndices.delete(lastCharIndex);
+       setErrorIndices(newErrorIndices);
     }
-  }, [isLoading, handleKeyDown]);
+
+}, [status, isLoading, startTest, startTime, userInput.length, errorIndices]);
+
 
   if (isLoading) {
     return (
@@ -833,14 +833,16 @@ export const TypingChallenge: React.FC<TypingChallengeProps> = ({ level, wordCou
               <input
                 ref={inputRef}
                 type="text"
-                className="absolute h-0 w-0 opacity-0"
+                className="fixed left-[-9999px] top-[-9999px] opacity-0"
                 autoCapitalize="off"
                 autoComplete="off"
                 autoCorrect="off"
                 spellCheck="false"
-                onChange={() => {}}
+                onInput={handleInput}
+                onKeyDown={handleKeyDown}
                 onBlur={() => { if (!isLoading && (status === 'active' || status === 'pending')) inputRef.current?.focus();}}
-                value=""
+                value={userInput}
+                readOnly={false}
                 aria-hidden="true"
                 tabIndex={-1}
                 disabled={status === 'completed'}
@@ -872,3 +874,5 @@ export const TypingChallenge: React.FC<TypingChallengeProps> = ({ level, wordCou
     </div>
   );
 };
+
+    
